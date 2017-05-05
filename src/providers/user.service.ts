@@ -2,7 +2,7 @@ import { LoadingController } from 'ionic-angular';
 import { User } from '../models/user';
 import { Injectable } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
-import { Observable } from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs/Rx';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 
@@ -10,6 +10,14 @@ import 'rxjs/add/operator/catch';
 export class UserService {
 
   private sheetsuApiUrl: string = 'https://sheetsu.com/apis/v1.0/f85c5184554b'; 
+
+  // Observable object sources
+  private _deleteUser = new Subject<any>();
+  private _addUser = new Subject<any>();
+
+  // Observable object streams
+  userDeleted$ = this._deleteUser.asObservable();
+  userAdded$ = this._addUser.asObservable();
 
   constructor(private http: Http, private loading: LoadingController) { }
 
@@ -54,6 +62,7 @@ export class UserService {
 
     // generate random id for testing
     body['id'] = Math.floor(Math.random()*(10000-1+1)+1);
+    this._addUser.next(body);
 
       return this.http
         .post(this.sheetsuApiUrl, body, options) // ...using post request
@@ -62,6 +71,7 @@ export class UserService {
   } 
 
   removeUser(body: Object): Observable<User> {
+    this._deleteUser.next(body);
     return this.http
       .delete(`${this.sheetsuApiUrl}/id/${body['id']}`) // ...using put request
       .map((res: Response) => res.json()) // ...and calling .json() on the response to return data

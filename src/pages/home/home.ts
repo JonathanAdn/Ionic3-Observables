@@ -1,8 +1,8 @@
 import { UserForm } from '../user-form/user-form';
-import { Observable, Subject } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Rx';
 import { UserService } from '../../providers/user.service';
 import { User } from '../../models/user';
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { LoadingController, NavController, NavParams } from 'ionic-angular';
 
 @Component({
@@ -12,77 +12,55 @@ import { LoadingController, NavController, NavParams } from 'ionic-angular';
 export class HomePage {
 
   tabBarElement: any;
-  users: Observable<User[]>;
+  users: User[];
   searchQuery: string = '';
-  deleteSubject: any;
-  addSubject: any;
-  mergedObs: any;
+  selectedUsers: any[] = [];
+  selectedUser: User;
 
   constructor(  private navCtrl: NavController, 
                 private userService: UserService, 
                 private loading: LoadingController, 
-                private navParams: NavParams,
-                private cdRef: ChangeDetectorRef  ) {
+                private navParams: NavParams ) {
 
     this.tabBarElement = document.querySelector('.tabbar.show-tabbar');
-    this.deleteSubject = new Subject();
-    this.addSubject = new Subject();
+
+    // on user deleted
+    userService.userDeleted$
+      .subscribe(user => this.users.splice(this.users.indexOf(user), 1));
+
+    // on user added  
+    userService.userAdded$
+      .subscribe(user => this.users.push(user));
   }
 
   loadUsersObs() {
     let loader = this.userService.createLoader();
     loader.present()
       .then(() => {
-        this.users = this.userService.getUsers();
-        this.mergedObs = this.users.merge(this.deleteSubject, this.addSubject)
-          .startWith([])
-          .scan((acc, val) => {
-            if(val instanceof Array) {
-              return val;
-            } else if(val['op'] === 'delete') {
-              let index = acc.findIndex(elt => elt.id === val['id']);
-              acc.splice(index, 1);
-              return acc;
-            } else if(val['op'] === 'add') {
-              let user = val['obj'];
-              acc.push(user);
-              return acc;
-            } 
+        this.userService.getUsers()
+          .subscribe(users => {
+            this.users = users;
+            loader.dismiss();
           })
-          loader.dismiss();
       })
       .catch(err => console.log('err in load users loader: ', err))
   }
 
   gotoUserForm(user: User): void {
-    // this.navCtrl.push(UserForm, { userForm: user });
-
-    let user_ = { name: 'Joe', score: 156 };
-    this.userService.addUser(user_)
-      .subscribe(() => {
-        this.addSubject.next({ 
-          op: 'add', 
-          obj: user_ 
-        });
-      })
+    this.navCtrl.push(UserForm, { userForm: user });
   }
 
-  deleteUser(user: User): void {
+  deleteUser(user?: User): void {
     let loader = this.userService.createLoader(`Deleting ${user.name}...`);
     loader.present()
       .then(() => {
         this.userService.removeUser(user)
-          .subscribe(() => {
-            this.deleteSubject.next({ op: 'delete', id: user.id });
-            loader.dismiss();
-          })
+          .subscribe(() => loader.dismiss())
       })
       .catch(err => console.log('err in delete user loader: ', err))
-    
   }
 
   ionViewWillEnter() {
-    this.cdRef.detectChanges();
     this.tabBarElement.style.display = 'none';
     if(!this.users) this.loadUsersObs();
   }
