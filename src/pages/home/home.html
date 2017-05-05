@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Home
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-searchbar
+  [(ngModel)]="searchQuery">
+  </ion-searchbar>
+    
+  <ion-icon class="add-user-icon" md="ios-add-circle-outline" (tap)="gotoUserForm()"></ion-icon>
+  
+  <ion-list>
+    <div ion-item *ngFor="let user of mergedObs | async | filterBy: searchQuery; let i = index" [ngClass]="{'mat-list mat-list-item': user.id === ''}" >
+      <span>{{ user.name }}</span><span style="float: right">{{ user.score }} 
+        <ion-icon (tap)="gotoUserForm(user)" class="padding" name="create"></ion-icon>
+        <ion-icon (tap)="deleteUser(user)" class="padding" md="md-close"></ion-icon></span>
+    </div>
+  </ion-list>
+
+  <!--<div *ngIf="(searchQuery !== '') && (mergedObs | async | filterBy: searchQuery)?.length === 0">
+      <span>No results</span>
+  </div>-->
+
+</ion-content>
