@@ -50,6 +50,7 @@ export class UserForm {
     })
     .catch(err => {
       this.isLoading = false;
+      console.log('error in submit loader', err)
     })
   }
 
