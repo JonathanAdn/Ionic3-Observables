@@ -11,8 +11,10 @@ import { LifeTab } from '../pages/tabs/life-tab/life-tab';
 import { WaterTab } from '../pages/tabs/water-tab/water-tab';
 import { Tabs } from '../pages/tabs/tabs';
 import { UserForm } from '../pages/user-form/user-form';
+import { ConfirmPopup } from '../components/confirm-popup/confirm-popup';
 
 import { UserService } from '../providers/user.service';
+import { PopupService } from '../providers/popup-service';
 
 import { FilterBy } from '../pipes/filter-by';
 
@@ -24,7 +26,8 @@ import { FilterBy } from '../pipes/filter-by';
     WaterTab,
     Tabs,
     FilterBy,
-    UserForm
+    UserForm,
+    ConfirmPopup
   ],
   imports: [
     BrowserModule,
@@ -41,13 +44,15 @@ import { FilterBy } from '../pipes/filter-by';
     LifeTab,
     WaterTab,
     Tabs,
-    UserForm
+    UserForm,
+    ConfirmPopup
   ],
   providers: [
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    UserService
+    UserService,
+    PopupService
   ]
 })
 export class AppModule {}

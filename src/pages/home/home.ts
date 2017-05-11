@@ -14,8 +14,7 @@ export class HomePage {
   tabBarElement: any;
   users: User[];
   searchQuery: string = '';
-  selectedUsers: any[] = [];
-  selectedUser: User;
+  actionMsg: string = '';
 
   constructor(  private navCtrl: NavController, 
                 private userService: UserService, 
@@ -25,12 +24,25 @@ export class HomePage {
     this.tabBarElement = document.querySelector('.tabbar.show-tabbar');
 
     // on user deleted
-    userService.userDeleted$
-      .subscribe(user => this.users.splice(this.users.indexOf(user), 1));
+    userService.userDeleted$.subscribe(user => {
+      console.log(user)
+      this.users.splice(this.users.indexOf(user), 1);
+    });
+
+    // on user edited
+    userService.userEdited$.subscribe(user => {
+      for(let i = 0; i < this.users.length; i++) {
+        if(this.users[i].id === user.id) {
+          this.users[i] = user;
+        }
+      }
+    });
 
     // on user added  
-    userService.userAdded$
-      .subscribe(user => this.users.push(user));
+    userService.userAdded$.subscribe(user => {
+      this.users.push(user);
+      // this.presentToaster(user.name, 'inserted')
+    });
   }
 
   loadUsersObs() {
@@ -46,8 +58,8 @@ export class HomePage {
       .catch(err => console.log('err in load users loader: ', err))
   }
 
-  gotoUserForm(user: User): void {
-    this.navCtrl.push(UserForm, { userForm: user });
+  gotoUserForm(user?: User): void {
+    user !== undefined ? this.navCtrl.push(UserForm, { id: user.id }) : this.navCtrl.push(UserForm);
   }
 
   deleteUser(user?: User): void {
@@ -55,10 +67,17 @@ export class HomePage {
     loader.present()
       .then(() => {
         this.userService.removeUser(user)
-          .subscribe(() => loader.dismiss())
+          .subscribe(() => loader.dismiss()
+          , err => console.log(err))
       })
       .catch(err => console.log('err in delete user loader: ', err))
   }
+
+  // presentToaster(user, action): void {
+  //   this.actionMsg = `${user} has been successfuly ${action}`;
+  //   let toast = this.userService.createToaster(this.actionMsg);
+  //   toast.present();
+  // }
 
   ionViewWillEnter() {
     this.tabBarElement.style.display = 'none';

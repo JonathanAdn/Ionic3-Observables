@@ -11,16 +11,19 @@
 </ion-header>
 
 <ion-content padding>
-  <form #userForm="ngForm" (ngSubmit)="submit(user)" novalidate>
+  <form #userForm="ngForm" (ngSubmit)="submit()" class="user-form" novalidate>
     <ion-item>
       <ion-label>Name</ion-label>
       <ion-input type="text" required [(ngModel)]="user.name" name="name" #name="ngModel"></ion-input>
+      <div [hidden]="name.pristine || name.valid">Name is required</div>
     </ion-item>
     <ion-item>
       <ion-label>Score</ion-label>
       <ion-input type="number" required [(ngModel)]="user.score" name="score" #score="ngModel"></ion-input>
+      <div [hidden]="score.pristine || score.valid">Score is required</div>
     </ion-item>
-    <br /><button *ngIf="user.id" ion-button type="submit" block [disabled]="userForm.form.invalid || isLoading" >Edit user</button>
-    <button *ngIf="!user.id" ion-button type="submit" block [disabled]="userForm.form.invalid || isLoading" >Add user</button>
+    <br /><button ion-button type="submit" block [disabled]="userForm.pristine || userForm.invalid || isLoading" > {{ operationText }} </button>
+    <button ion-button block (tap)="cancel($event)"> Cancel </button>
+    <button *ngIf="user.id" ion-button block color="danger" (tap)="delete($event)"> Delete </button>
   </form>
 </ion-content>

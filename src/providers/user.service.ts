@@ -14,10 +14,12 @@ export class UserService {
   // Observable object sources
   private _deleteUser = new Subject<any>();
   private _addUser = new Subject<any>();
+  private _editUser = new Subject<any>();
 
   // Observable object streams
   userDeleted$ = this._deleteUser.asObservable();
   userAdded$ = this._addUser.asObservable();
+  userEdited$ = this._editUser.asObservable();
 
   constructor(private http: Http, private loading: LoadingController) { }
 
@@ -51,7 +53,10 @@ export class UserService {
 
       return this.http
         .put(`${this.sheetsuApiUrl}/id/${body['id']}`, body, options) // ...using put request
-        .map((res: Response) => res.json()) // ...and calling .json() on the response to return data
+        .map((res: Response) => {
+          let user = res.json()[0];
+          this._editUser.next(user);
+        }) // ...and calling .json() on the response to return data
         .catch((error: any) => Observable.throw(error.json().error || 'Server error')); //...errors if any
   } 
 
@@ -62,19 +67,22 @@ export class UserService {
 
     // generate random id for testing
     body['id'] = Math.floor(Math.random()*(10000-1+1)+1);
-    this._addUser.next(body);
 
       return this.http
         .post(this.sheetsuApiUrl, body, options) // ...using post request
-        .map((res: Response) => res.json()) // ...and calling .json() on the response to return data
+        .map((res: Response) => {
+          let user = res.json();
+          this._addUser.next(user);
+        }) // ...and calling .json() on the response to return data
         .catch((error: any) => Observable.throw(error.json().error || 'Server error')); //...errors if any
   } 
 
   removeUser(body: Object): Observable<User> {
-    this._deleteUser.next(body);
     return this.http
       .delete(`${this.sheetsuApiUrl}/id/${body['id']}`) // ...using put request
-      .map((res: Response) => res.json()) // ...and calling .json() on the response to return data
+      .map((res: Response) => {
+        this._deleteUser.next(body);
+      }) // ...and calling .json() on the response to return data
       .catch((error: any) => Observable.throw(error.json().error || 'Server error')); //...errors if an
   }
 }
