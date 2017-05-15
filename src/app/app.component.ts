@@ -12,7 +12,7 @@ import { Tabs } from '../pages/tabs/tabs';
 export class MyApp {
 
   @ViewChild('myNav') nav;
-  rootPage: any = Tabs;
+  rootPage: any = HomePage;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen) {
     platform.ready().then(() => {
@@ -25,9 +25,9 @@ export class MyApp {
 
   ngAfterViewInit() {
     // Let's navigate from TabsPage to Page1
-    setTimeout(() => {
-      this.nav.push(HomePage);
-    }, 500)
+    // setTimeout(() => {
+    //   this.nav.push(HomePage);
+    // }, 500)
   }
 }
 

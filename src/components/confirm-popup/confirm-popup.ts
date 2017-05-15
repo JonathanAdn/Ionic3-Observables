@@ -1,7 +1,6 @@
 import { HomePage } from '../../pages/home/home';
-import { ViewController } from 'ionic-angular';
+import { ViewController, App } from 'ionic-angular';
 import { Component } from '@angular/core';
-import { Observable, Subject } from 'rxjs/Rx';
 import { PopupService } from '../../providers/popup-service';
 
 /**
@@ -16,7 +15,7 @@ import { PopupService } from '../../providers/popup-service';
 })
 export class ConfirmPopup {
 
-  constructor(private viewCtrl: ViewController, private popopService: PopupService) { }
+  constructor(private viewCtrl: ViewController, private popopService: PopupService, private appCtrl: App) { }
 
   close() {
     this.viewCtrl.dismiss();
@@ -25,6 +24,7 @@ export class ConfirmPopup {
   onConfirm() {
     this.popopService.confirm();
     this.viewCtrl.dismiss();
+    this.appCtrl.getRootNav().pop();
   }
 
 }

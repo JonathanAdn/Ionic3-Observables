@@ -1,4 +1,4 @@
-import { LoadingController } from 'ionic-angular';
+import { LoadingController, ToastController } from 'ionic-angular';
 import { User } from '../models/user';
 import { Injectable } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
@@ -21,15 +21,22 @@ export class UserService {
   userAdded$ = this._addUser.asObservable();
   userEdited$ = this._editUser.asObservable();
 
-  constructor(private http: Http, private loading: LoadingController) { }
+  constructor(private http: Http, private loading: LoadingController, private toaster: ToastController) { }
 
   createLoader(params?: any): any {
     let loader: any = this.loading.create({
       spinner: 'crescent',
-      content: params ? params : 'Please wait...',
-      showBackdrop: false
+      content: params ? params : 'Please wait...'
     });
     return loader;
+  }
+
+  createToaster(params?: any): any {
+    let toaster: any = this.toaster.create({
+      message: params,
+      duration: 3000
+    });
+    return toaster;
   }
 
   getUsers(): Observable<User[]> {

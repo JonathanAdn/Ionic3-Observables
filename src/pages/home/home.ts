@@ -1,5 +1,4 @@
 import { UserForm } from '../user-form/user-form';
-import { Observable } from 'rxjs/Rx';
 import { UserService } from '../../providers/user.service';
 import { User } from '../../models/user';
 import { Component } from '@angular/core';
@@ -25,23 +24,25 @@ export class HomePage {
 
     // on user deleted
     userService.userDeleted$.subscribe(user => {
-      console.log(user)
-      this.users.splice(this.users.indexOf(user), 1);
+      let index = this.users.indexOf(user);
+      if(~index) this.users.splice(index, 1);
+      this.presentToaster(user.name, 'removed');
     });
 
     // on user edited
     userService.userEdited$.subscribe(user => {
       for(let i = 0; i < this.users.length; i++) {
-        if(this.users[i].id === user.id) {
+        if(user.id === (this.users[i].id).toString()) {
           this.users[i] = user;
         }
       }
+      this.presentToaster(user.name, 'updated');
     });
 
     // on user added  
     userService.userAdded$.subscribe(user => {
       this.users.push(user);
-      // this.presentToaster(user.name, 'inserted')
+      this.presentToaster(user.name, 'inserted');
     });
   }
 
@@ -73,19 +74,19 @@ export class HomePage {
       .catch(err => console.log('err in delete user loader: ', err))
   }
 
-  // presentToaster(user, action): void {
-  //   this.actionMsg = `${user} has been successfuly ${action}`;
-  //   let toast = this.userService.createToaster(this.actionMsg);
-  //   toast.present();
-  // }
+  presentToaster(user, action): void {
+    this.actionMsg = `${user} has been successfuly ${action}`;
+    let toast = this.userService.createToaster(this.actionMsg);
+    toast.present();
+  }
 
   ionViewWillEnter() {
-    this.tabBarElement.style.display = 'none';
+    // this.tabBarElement.style.display = 'none';
     if(!this.users) this.loadUsersObs();
   }
  
   ionViewWillLeave() {
-    this.tabBarElement.style.display = 'flex';
+    // this.tabBarElement.style.display = 'flex';
   }
 
 }

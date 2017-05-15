@@ -32,11 +32,11 @@ export class UserForm {
                 private userService: UserService, 
                 private loading: LoadingController,
                 private popoverCtrl: PopoverController,
-                private popupService: PopupService  ) {
+                private popupService: PopupService ) {
 
     this.tabBarElement = document.querySelector('.tabbar.show-tabbar');
 
-    popupService._confirmed$.subscribe(res => { if(res === 'confirmed') this.navCtrl.popTo(HomePage) })
+    popupService._confirmed$.subscribe(res => { if(res === 'confirmed') console.log('confirmed')})
   }
 
   submit(): void {
@@ -49,6 +49,10 @@ export class UserForm {
             this.userForm.form.markAsPristine();
             this.navCtrl.pop();
             loader.dismiss(); 
+          },
+          err => {
+            console.log('error in update user obs', err);
+            loader.dismiss();
           })
       } else {
         this.userService.addUser(this.user)
@@ -56,9 +60,12 @@ export class UserForm {
             this.userForm.form.markAsPristine();
             this.navCtrl.pop(); 
             loader.dismiss();
+          },
+          err => {
+            console.log('error in insert user obs', err);
+            loader.dismiss();
           })
       }
-      
     })
     .catch(err => {
       this.isLoading = false;
@@ -67,12 +74,20 @@ export class UserForm {
   }
 
   getUser(id: number): void {
+    this.isLoading = true;
     let loader = this.userService.createLoader();
     loader.present().then(() => {
-      this.userService.getUser(id).subscribe(user => {
-        this.user = user;
-        loader.dismiss();
-      })
+      this.userService.getUser(id)
+        .subscribe(user => {
+          this.user = user;
+          this.isLoading = false;
+          loader.dismiss();
+        },
+        err => {
+          console.log('err in get user obs', err);
+          this.isLoading = false;
+          loader.dismiss();
+        })
     })
   }
   
@@ -105,7 +120,7 @@ export class UserForm {
   }
 
   ionViewWillEnter() {
-    this.tabBarElement.style.display = 'none';
+    // this.tabBarElement.style.display = 'none';
     let id = this.navParams.get('id');
     if(id) {
       this.getUser(id);
@@ -114,7 +129,7 @@ export class UserForm {
   }
  
   ionViewWillLeave() {
-    this.tabBarElement.style.display = 'flex';
+    // this.tabBarElement.style.display = 'flex';
   }
 
 }
